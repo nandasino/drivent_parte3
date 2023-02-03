@@ -4,7 +4,7 @@ import { Response } from "express";
 import httpStatus from "http-status";
 
 export async function getHotels(req: AuthenticatedRequest, res: Response) {
-  const userId = req;
+  const { userId } = req;
    try {
       const result = await hotelsService.getHotels(Number(userId));
       res.status(httpStatus.OK).send(result);
