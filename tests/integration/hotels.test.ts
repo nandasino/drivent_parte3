@@ -10,6 +10,7 @@ import {
   createEnrollmentWithAddress,
   createTicketHotelIncluded,
   createTicketHotelNotIncluded,
+  createTicketRemote,
   createTicket,
 } from "../factories";
 import { cleanDb, generateValidToken } from "../helpers";
@@ -58,6 +59,34 @@ describe("GET /hotels", () => {
       const ticketType = await createTicketHotelNotIncluded();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
 
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
+    });
+
+    it("should respond with status 402 if event is remote", async () => {
+      const user = await createUser();
+      
+      const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketRemote();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
+    });
+
+    it("should respond with status 402 if there is no payment", async () => {
+      const user = await createUser();     
+      const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketHotelIncluded();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+
+      const hotel = await createHotel();
       const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
