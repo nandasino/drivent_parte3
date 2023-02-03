@@ -50,6 +50,28 @@ describe("GET /hotels", () => {
   });
 
   describe("when token is valid", () => {
+    it("should respond with status 400 if there is no enrollment", async () => {
+      const user = await createUser();     
+      const token = await generateValidToken(user);
+
+      const hotel = await createHotel();
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.NOT_FOUND);
+    });
+
+    it("should respond with status 400 if there is no ticket", async () => {
+      const user = await createUser();     
+      const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+
+      const hotel = await createHotel();
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.NOT_FOUND);
+    });
+
     it("should respond with status 402 if hotel is not included", async () => {
       const user = await createUser();
       
@@ -92,7 +114,7 @@ describe("GET /hotels", () => {
       expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
 
-    it("should respond with status 200 and array of hotels if there is an hotel and payment", async () => {
+    it("should respond with status 200 and array of hotels", async () => {
       const user = await createUser();     
       const token = await generateValidToken(user);
 
@@ -115,7 +137,7 @@ describe("GET /hotels", () => {
       ])
     });
 
-    it("should respond with empty array when there are payment but no hotels", async () => {
+    it("should respond with empty array when there are no hotels", async () => {
       const user = await createUser();
       
       const token = await generateValidToken(user);
