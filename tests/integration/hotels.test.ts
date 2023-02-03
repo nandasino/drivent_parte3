@@ -10,7 +10,6 @@ import {
   createEnrollmentWithAddress,
   createTicketHotelIncluded,
   createTicket,
-  createPayment,
 } from "../factories";
 import { cleanDb, generateValidToken } from "../helpers";
 
@@ -72,10 +71,14 @@ describe("GET /hotels", () => {
       ])
     });
 
-    it("should respond with empty array when there are no hotels", async () => {
+    it("should respond with empty array when there are payment but no hotels", async () => {
       const user = await createUser();
       
       const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketHotelIncluded();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
 
       const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
 
