@@ -9,6 +9,7 @@ import {
   createHotel,
   createEnrollmentWithAddress,
   createTicketHotelIncluded,
+  createTicketHotelNotIncluded,
   createTicket,
 } from "../factories";
 import { cleanDb, generateValidToken } from "../helpers";
@@ -48,6 +49,20 @@ describe("GET /hotels", () => {
   });
 
   describe("when token is valid", () => {
+    it("should respond with status 402 if hotel is not included", async () => {
+      const user = await createUser();
+      
+      const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketHotelNotIncluded();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
+    });
+
     it("should respond with status 200 and array of hotels if there is an hotel and payment", async () => {
       const user = await createUser();     
       const token = await generateValidToken(user);
