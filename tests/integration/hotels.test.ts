@@ -50,7 +50,7 @@ describe("GET /hotels", () => {
   });
 
   describe("when token is valid", () => {
-    it("should respond with status 400 if there is no enrollment", async () => {
+    it("should respond with status 404 if there is no enrollment", async () => {
       const user = await createUser();     
       const token = await generateValidToken(user);
 
@@ -60,7 +60,7 @@ describe("GET /hotels", () => {
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
-    it("should respond with status 400 if there is no ticket", async () => {
+    it("should respond with status 404 if there is no ticket", async () => {
       const user = await createUser();     
       const token = await generateValidToken(user);
 
