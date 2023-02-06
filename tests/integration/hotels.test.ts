@@ -73,6 +73,20 @@ describe("GET /hotels", () => {
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
 
+    it("should respond with status 404 when there are no hotels", async () => {
+      const user = await createUser();
+      
+      const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketHotelIncluded();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+
+      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.NOT_FOUND);
+    });
+
     it("should respond with status 402 if hotel is not included", async () => {
       const user = await createUser();
       
@@ -136,20 +150,6 @@ describe("GET /hotels", () => {
           updatedAt: hotel.updatedAt.toISOString()
         }
       ]);
-    });
-
-    it("should respond with empty array when there are no hotels", async () => {
-      const user = await createUser();
-      
-      const token = await generateValidToken(user);
-
-      const enrollment = await createEnrollmentWithAddress(user);
-      const ticketType = await createTicketHotelIncluded();
-      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
-
-      const response = await server.get("/hotels").set("Authorization", `Bearer ${token}`);
-
-      expect(response.body).toEqual([]);
     });
   });
 });
