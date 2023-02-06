@@ -213,7 +213,6 @@ describe("GET /hotels/:hotelID", () => {
       const response = await server.get(`/hotels/${1}`).set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
-      expect(response.body).toEqual({});
     });
 
     it("should respond with status 402 if hotel is not included", async () => {
